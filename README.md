@@ -1,2 +1,2 @@
-# Py-Cord-Cogs
-📃 Some Py-Cord Cogs for your Discord Bot.
+> [!IMPORTANT]
+> **Unauthorized resale** of the code for financial gain may lead to **legal consequences.**
