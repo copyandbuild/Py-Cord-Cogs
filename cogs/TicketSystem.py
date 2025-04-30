@@ -8,26 +8,35 @@ class Ticket(ezcord.Cog, emoji="🎫"):
     default_color = 0x57F287
     staff_role_id = 1363896903141429482
     ticket_category_id = 1361360637359554611
+    server_name = "YOUR_SERVER_NAME"
+
+    def __init__(self, bot: discord.Bot):
+        self.bot = bot
 
     @slash_command()
     @discord.default_permissions(administrator=True)
     async def ticket(self, ctx):
         embed = discord.Embed(
-            title="🎫 YOUR_SERVER_NAME × Ticket-Support",
+            title=f"🎫 {self.server_name} × Ticket-Support",
             description="Hey, danke, dass du unseren Support nutzt!\n\n> Wir bitten dich, dein Problem möglichst genau zu beschreiben, damit unsere Supporter dir so schnell wie möglich helfen können.\n\n> **Bitte habe ein wenig Geduld, da unser Support auch ein Privatleben hat**!",
             color=self.default_color,
         )
 
-        await ctx.send(embed=embed, view=TicketDropdownView())
+        await ctx.send(embed=embed, view=TicketDropdownView(self.staff_role_id, self.ticket_category_id, server_name=self.server_name))
         await ctx.respond("Ticket-Embed wurde erstellt.", ephemeral=True)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_view(TicketDropdownView())
-        self.bot.add_view(TicketActionView())
+        self.bot.add_view(TicketDropdownView(self.staff_role_id, self.ticket_category_id, self.server_name))
+        self.bot.add_view(TicketActionView(self.staff_role_id))
+
 
 class TicketDropdown(discord.ui.Select):
-    def __init__(self):
+    def __init__(self, staff_role: int, ticket_category_id: int, server_name: str):
+        self.staff_role_id = staff_role
+        self.ticket_category_id = ticket_category_id
+        self.server_name = server_name
+
         options = [
             discord.SelectOption(label="Support", description="Erstelle ein Support-Ticket", emoji="🛠️"),
             discord.SelectOption(label="Team-Bewerbung", description="Erstelle ein Team-Bewerbung-Ticket", emoji="📄"),
@@ -53,15 +62,15 @@ class TicketDropdown(discord.ui.Select):
             f"🎫〡{username}", category=category, overwrites=overwrites, topic=f"{self.values[0]}", reason=f"Ticket erstellt, {interaction.user.name} ({interaction.user.id}) hat ein Ticket erstellt."
         )
         embed = discord.Embed(
-            title=f"BambooSMP | {self.values[0]} Ticket",
+            title=f"{self.server_name} | {self.values[0]} Ticket",
             description=f"{interaction.user.mention} bitte beschreibe dein Anliegen oder Problem detailliert, damit unser Team dir bestmöglich helfen kann.",
             color=0x57F287,
         )
         embed.set_footer(text="Bitte warte, bis sich ein Teammitglied meldet.")
-        message = await ticket_channel.send(embed=embed, view=TicketActionView(), content=f"{staff_role.mention}")
+        message = await ticket_channel.send(embed=embed, view=TicketActionView(self.staff_role_id), content=f"{staff_role.mention}")
 
         confirmation_embed = discord.Embed(
-            title=f"BambooSMP | {self.values[0]} Ticket",
+            title=f"{self.server_name} | {self.values[0]} Ticket",
             description=f"Dein Ticket wurde erfolgreich erstellt: {ticket_channel.mention}",
             color=0x57F287,
         )
@@ -70,14 +79,17 @@ class TicketDropdown(discord.ui.Select):
         await message.pin()
         await ticket_channel.purge(limit=1)
 
+
 class TicketDropdownView(discord.ui.View):
-    def __init__(self):
+    def __init__(self, staff_role_id: int, ticket_category_id: int, server_name: str):
         super().__init__(timeout=None)
-        self.add_item(TicketDropdown())
+        self.add_item(TicketDropdown(staff_role=staff_role_id, ticket_category_id=ticket_category_id, server_name=server_name))
+
 
 class TicketActionView(discord.ui.View):
-    def __init__(self):
+    def __init__(self, staff_role_id: int):
         super().__init__(timeout=None)
+        self.staff_role_id = staff_role_id
 
     @discord.ui.button(label="Ticket übernehmen", style=discord.ButtonStyle.success, emoji="✅", custom_id="claimticketidyeah")
     async def claim_button(self, button, interaction: discord.Interaction):
@@ -89,7 +101,7 @@ class TicketActionView(discord.ui.View):
         button.disabled = True
         await interaction.message.edit(view=self)
         embed = discord.Embed(
-            title="YOUR_SERVER_NAME | Ticket-Support",
+            title="{self.server_name} | Ticket-Support",
             description=f"Dieses Ticket wird nun von {interaction.user.mention} bearbeitet.",
             color=0x57F287,
         )
@@ -104,7 +116,7 @@ class TicketActionView(discord.ui.View):
 
         await interaction.channel.delete()
         embed = discord.Embed(
-            title="YOUR_SERVER_NAME | Ticket-Support",
+            title="{self.server_name} | Ticket-Support",
             description="Das Ticket wurde geschlossen.",
             color=0x57F287,
         )
@@ -113,6 +125,7 @@ class TicketActionView(discord.ui.View):
             await interaction.user.send(embed=embed)
         except discord.Forbidden:
             pass
+
 
 def setup(bot: discord.Bot):
     bot.add_cog(Ticket(bot))
