@@ -30,7 +30,6 @@ class Ticket(ezcord.Cog, emoji="🎫"):
         self.bot.add_view(TicketDropdownView(self.staff_role_id, self.ticket_category_id, self.server_name))
         self.bot.add_view(TicketActionView(self.staff_role_id, self.server_name))
 
-
 class TicketDropdown(discord.ui.Select):
     def __init__(self, staff_role: int, ticket_category_id: int, server_name: str):
         self.staff_role_id = staff_role
@@ -79,19 +78,16 @@ class TicketDropdown(discord.ui.Select):
         await message.pin()
         await ticket_channel.purge(limit=1)
 
-
 class TicketDropdownView(discord.ui.View):
     def __init__(self, staff_role_id: int, ticket_category_id: int, server_name: str):
         super().__init__(timeout=None)
         self.add_item(TicketDropdown(staff_role=staff_role_id, ticket_category_id=ticket_category_id, server_name=server_name))
-
 
 class TicketActionView(discord.ui.View):
     def __init__(self, staff_role_id: int, server_name: str):
         super().__init__(timeout=None)
         self.staff_role_id = staff_role_id
         self.server_name = server_name
-
 
     @discord.ui.button(label="Ticket übernehmen", style=discord.ButtonStyle.success, emoji="✅", custom_id="claimticketidyeah")
     async def claim_button(self, button, interaction: discord.Interaction):
@@ -127,7 +123,6 @@ class TicketActionView(discord.ui.View):
             await interaction.user.send(embed=embed)
         except discord.Forbidden:
             pass
-
 
 def setup(bot: discord.Bot):
     bot.add_cog(Ticket(bot))
