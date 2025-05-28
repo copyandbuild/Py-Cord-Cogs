@@ -101,7 +101,7 @@ class TicketActionView(discord.ui.View):
         button.disabled = True
         await interaction.message.edit(view=self)
         embed = discord.Embed(
-            title="{self.server_name} | Ticket-Support",
+            title=f"{self.server_name} | Ticket-Support",
             description=f"Dieses Ticket wird nun von {interaction.user.mention} bearbeitet.",
             color=0x57F287,
         )
@@ -116,7 +116,7 @@ class TicketActionView(discord.ui.View):
 
         await interaction.channel.delete()
         embed = discord.Embed(
-            title="{self.server_name} | Ticket-Support",
+            title=f"{self.server_name} | Ticket-Support",
             description="Das Ticket wurde geschlossen.",
             color=0x57F287,
         )
