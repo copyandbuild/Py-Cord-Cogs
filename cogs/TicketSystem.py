@@ -28,7 +28,7 @@ class Ticket(ezcord.Cog, emoji="🎫"):
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.add_view(TicketDropdownView(self.staff_role_id, self.ticket_category_id, self.server_name))
-        self.bot.add_view(TicketActionView(self.staff_role_id))
+        self.bot.add_view(TicketActionView(self.staff_role_id, self.server_name))
 
 
 class TicketDropdown(discord.ui.Select):
@@ -67,7 +67,7 @@ class TicketDropdown(discord.ui.Select):
             color=0x57F287,
         )
         embed.set_footer(text="Bitte warte, bis sich ein Teammitglied meldet.")
-        message = await ticket_channel.send(embed=embed, view=TicketActionView(self.staff_role_id), content=f"{staff_role.mention}")
+        message = await ticket_channel.send(embed=embed, view=TicketActionView(self.staff_role_id, self.server_name), content=f"{staff_role.mention}")
 
         confirmation_embed = discord.Embed(
             title=f"{self.server_name} | {self.values[0]} Ticket",
@@ -87,9 +87,11 @@ class TicketDropdownView(discord.ui.View):
 
 
 class TicketActionView(discord.ui.View):
-    def __init__(self, staff_role_id: int):
+    def __init__(self, staff_role_id: int, server_name: str):
         super().__init__(timeout=None)
         self.staff_role_id = staff_role_id
+        self.server_name = server_name
+
 
     @discord.ui.button(label="Ticket übernehmen", style=discord.ButtonStyle.success, emoji="✅", custom_id="claimticketidyeah")
     async def claim_button(self, button, interaction: discord.Interaction):
